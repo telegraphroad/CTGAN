@@ -330,7 +330,9 @@ class CTGANSynthesizer(BaseSynthesizer):
             self._generator.parameters(), lr=self._generator_lr, betas=(0.5, 0.9),
             weight_decay=self._generator_decay
         )
-        nfoptimizer = torch.optim.AdamW(self.nf_generator.parameters(),lr=1e-4)
+        if self._training_track == 'NF':
+
+            nfoptimizer = torch.optim.AdamW(self.nf_generator.parameters(),lr=1e-4)
         optimizerD = optim.AdamW(
             discriminator.parameters(), lr=self._discriminator_lr,
             betas=(0.5, 0.9), weight_decay=self._discriminator_decay
