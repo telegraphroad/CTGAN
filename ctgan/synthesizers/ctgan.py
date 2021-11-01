@@ -133,22 +133,22 @@ class CTGANSynthesizer(BaseSynthesizer):
             Generator prior
         training_track (str):
             'GAN' or 'NF'
-        nf_generator
+        nfgenerator
     """
 
     def __init__(self,gen_prior, embedding_dim=128, generator_dim=(256, 256), discriminator_dim=(256, 256),
                  generator_lr=2e-4, generator_decay=1e-6, discriminator_lr=2e-4,
                  discriminator_decay=1e-6, batch_size=500, discriminator_steps=1,
-                 log_frequency=True, verbose=False, epochs=300, pac=10, cuda=True, training_track = 'GAN',nf_generator = None):
+                 log_frequency=True, verbose=False, epochs=300, pac=10, cuda=True, training_track = 'GAN',nfgenerator = None):
 
         assert batch_size % 2 == 0
 
         self._embedding_dim = embedding_dim
-        self._generator_dim = generator_dim
+        self.generator_dim = generator_dim
         self._discriminator_dim = discriminator_dim
         self.gen_prior = gen_prior
-        self._generator_lr = generator_lr
-        self._generator_decay = generator_decay
+        self.generator_lr = generator_lr
+        self.generator_decay = generator_decay
         self._discriminator_lr = discriminator_lr
         self._discriminator_decay = discriminator_decay
         self._training_track = training_track
@@ -157,7 +157,7 @@ class CTGANSynthesizer(BaseSynthesizer):
         self._log_frequency = log_frequency
         self._verbose = verbose
         self._epochs = epochs
-        self.nf_generator = nf_generator
+        self.nfgenerator = nfgenerator
         self.pac = pac
         self.glosses = []
         self.dlosses = []
@@ -173,7 +173,7 @@ class CTGANSynthesizer(BaseSynthesizer):
 
         self._transformer = None
         self._data_sampler = None
-        self._generator = None
+        self.generator = None
 
     @staticmethod
     def _gumbel_softmax(logits, tau=1, hard=False, eps=1e-10, dim=-1):
@@ -314,9 +314,9 @@ class CTGANSynthesizer(BaseSynthesizer):
         data_dim = train_data.shape[1]
         self._data_dim = data_dim
 
-        self._generator = Generator(
+        self.generator = Generator(
             self._embedding_dim,# + self._data_sampler.dim_cond_vec(),
-            self._generator_dim,
+            self.generator_dim,
             data_dim
         ).to(self._device)
 
@@ -327,12 +327,12 @@ class CTGANSynthesizer(BaseSynthesizer):
         ).to(self._device)
 
         optimizerG = optim.AdamW(
-            self._generator.parameters(), lr=self._generator_lr, betas=(0.5, 0.9),
-            weight_decay=self._generator_decay
+            self.generator.parameters(), lr=self.generator_lr, betas=(0.5, 0.9),
+            weight_decay=self.generator_decay
         )
         if self._training_track == 'NF':
 
-            nfoptimizer = torch.optim.AdamW(self.nf_generator.parameters(),lr=1e-4)
+            nfoptimizer = torch.optim.AdamW(self.nfgenerator.parameters(),lr=1e-4)
         optimizerD = optim.AdamW(
             discriminator.parameters(), lr=self._discriminator_lr,
             betas=(0.5, 0.9), weight_decay=self._discriminator_decay
@@ -365,7 +365,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                                 self._batch_size, col[perm], opt[perm])
                             c2 = c1[perm]
 
-                        fake = self._generator(fakez)
+                        fake = self.generator(fakez)
                         #fakeact = self._apply_activate(fake)
                         fakeact = fake
 
@@ -403,7 +403,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                         m1 = torch.from_numpy(m1).to(self._device)
                         fakez = torch.cat([fakez, c1], dim=1)
 
-                    fake = self._generator(fakez)
+                    fake = self.generator(fakez)
                     #fakeact = self._apply_activate(fake)
                     fakeact = fake
 
@@ -423,13 +423,13 @@ class CTGANSynthesizer(BaseSynthesizer):
                     loss_g.backward()
                     optimizerG.step()
                 elif self._training_track == 'NF':
-                    self.nf_generator.train()
-                    # fakez = self.nf_generator.prior.sample((self._batch_size, data_dim)).to(self._device)
+                    self.nfgenerator.train()
+                    # fakez = self.nfgenerator.prior.sample((self._batch_size, data_dim)).to(self._device)
 
-                    # fake,_,__ = self.nf_generator(fakez)
+                    # fake,_,__ = self.nfgenerator(fakez)
                     # fakeact = fake      
                     real = torch.from_numpy(real.detach().cpu().numpy().astype('float32')).to(self._device)
-                    zs, prior_logprob, log_det = self.nf_generator(real)
+                    zs, prior_logprob, log_det = self.nfgenerator(real)
                     if len(prior_logprob)>1:
                         prior_logprob = torch.mean(prior_logprob,axis=1)
                     logprob = logprob = prior_logprob + log_det
@@ -440,7 +440,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                         self.best_model = copy.deepcopy(self)
                         print('new best performance detected!')
 
-                    self.nf_generator.zero_grad()
+                    self.nfgenerator.zero_grad()
                     nfloss.backward()
                     nfoptimizer.step()
                     self.glosses.append(nfloss.detach().cpu().numpy())
@@ -477,14 +477,14 @@ class CTGANSynthesizer(BaseSynthesizer):
         steps = n // self._batch_size + 1
         data = []
         if self._training_track == 'NF':
-            self.nf_generator.eval()
+            self.nfgenerator.eval()
         for i in range(steps):
             if self._training_track == 'GAN':
                 fakez = torch.FloatTensor(self.gen_prior.sample([self._batch_size,self._embedding_dim]).cpu().numpy())
                 fake = self.generator(fakez)
             else:
-                #fakez = self.nf_generator.prior.sample((self._batch_size, self._data_dim)).to(self._device)
-                fake = self.nf_generator.sample(self._batch_size)
+                #fakez = self.nfgenerator.prior.sample((self._batch_size, self._data_dim)).to(self._device)
+                fake = self.nfgenerator.sample(self._batch_size)
 
 
             #fakeact = self._apply_activate(fake)
@@ -499,5 +499,5 @@ class CTGANSynthesizer(BaseSynthesizer):
 
     def set_device(self, device):
         self._device = device
-        if self._generator is not None:
-            self._generator.to(self._device)
+        if self.generator is not None:
+            self.generator.to(self._device)
