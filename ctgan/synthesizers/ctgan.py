@@ -375,11 +375,11 @@ class CTGANSynthesizer(BaseSynthesizer):
                             fake_cat = torch.cat([fakeact, c1], dim=1)
                             real_cat = torch.cat([real, c2], dim=1)
                         else:
-                            real_cat = real
-                            fake_cat = fakeact
+                            real_cat = real.float()
+                            fake_cat = fakeact.float()
 
-                        y_fake = discriminator(fake_cat.float())
-                        y_real = discriminator(real_cat.float())
+                        y_fake = discriminator(fake_cat)
+                        y_real = discriminator(real_cat)
 
                         pen = discriminator.calc_gradient_penalty(
                             real_cat, fake_cat, self._device, self.pac)
