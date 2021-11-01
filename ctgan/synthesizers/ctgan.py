@@ -311,6 +311,7 @@ class CTGANSynthesizer(BaseSynthesizer):
         #     self._log_frequency)
 
         min_loss = 999999999999999999.99999999999999
+        loss_d = 0.0
         data_dim = train_data.shape[1]
         self._data_dim = data_dim
 
