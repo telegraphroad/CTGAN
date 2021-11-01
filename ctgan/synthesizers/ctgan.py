@@ -464,7 +464,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                       flush=True)
                 elif self._training_track == 'NF':
                     print(f"Epoch {i+1}, Loss G: {nfloss.detach().cpu(): .4f}, "
-                      f"Loss D: {loss_d.detach().cpu(): .4f}",
+                      f"Loss D: {loss_d: .4f}",
                       flush=True)
     def sample(self, n, condition_column=None, condition_value=None):
         """Sample data similar to the training data.
