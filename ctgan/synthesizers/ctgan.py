@@ -369,7 +369,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                         #fakeact = self._apply_activate(fake)
                         fakeact = fake
 
-                        real = torch.from_numpy(real.astype('float32')).to(self._device)
+                        #real = torch.from_numpy(real.astype('float32')).to(self._device)
 
                         if c1 is not None:
                             fake_cat = torch.cat([fakeact, c1], dim=1)
