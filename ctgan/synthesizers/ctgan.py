@@ -1,5 +1,5 @@
 import warnings
-
+import copy
 import numpy as np
 import pandas as pd
 import torch
@@ -419,6 +419,12 @@ class CTGANSynthesizer(BaseSynthesizer):
 
                     loss_g = -torch.mean(y_fake) + cross_entropy
                     self.glosses.append(loss_g.detach().cpu().numpy())
+                    if loss_g.item()<min_loss:
+                        min_loss = loss_g.item()
+                        self.best_model = None
+                        self.best_model = copy.deepcopy(self)
+                        print('new best performance detected!')
+
                     optimizerG.zero_grad()
                     loss_g.backward()
                     optimizerG.step()
