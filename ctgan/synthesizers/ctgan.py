@@ -366,7 +366,8 @@ class CTGANSynthesizer(BaseSynthesizer):
                             c2 = c1[perm]
 
                         fake = self._generator(fakez)
-                        fakeact = self._apply_activate(fake)
+                        #fakeact = self._apply_activate(fake)
+                        fakeact = fake
 
                         real = torch.from_numpy(real.astype('float32')).to(self._device)
 
@@ -403,7 +404,8 @@ class CTGANSynthesizer(BaseSynthesizer):
                         fakez = torch.cat([fakez, c1], dim=1)
 
                     fake = self._generator(fakez)
-                    fakeact = self._apply_activate(fake)
+                    #fakeact = self._apply_activate(fake)
+                    fakeact = fake
 
                     if c1 is not None:
                         y_fake = discriminator(torch.cat([fakeact, c1], dim=1))
