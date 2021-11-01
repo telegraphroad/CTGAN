@@ -365,6 +365,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                                 self._batch_size, col[perm], opt[perm])
                             c2 = c1[perm]
 
+                        
                         fake = self.generator(fakez)
                         #fakeact = self._apply_activate(fake)
                         fakeact = fake
@@ -456,10 +457,14 @@ class CTGANSynthesizer(BaseSynthesizer):
                     self.glosses.append(nfloss.detach().cpu().numpy())
 
             if self._verbose:
-                print(f"Epoch {i+1}, Loss G: {loss_g.detach().cpu(): .4f}, "
+                if self._training_track == 'GAN':
+                    print(f"Epoch {i+1}, Loss G: {loss_g.detach().cpu(): .4f}, "
                       f"Loss D: {loss_d.detach().cpu(): .4f}",
                       flush=True)
-
+                elif self._training_track == 'NF':
+                    print(f"Epoch {i+1}, Loss G: {nfloss.detach().cpu(): .4f}, "
+                      f"Loss D: {loss_d.detach().cpu(): .4f}",
+                      flush=True)
     def sample(self, n, condition_column=None, condition_value=None):
         """Sample data similar to the training data.
 
