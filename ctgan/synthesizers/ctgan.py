@@ -378,8 +378,8 @@ class CTGANSynthesizer(BaseSynthesizer):
                             real_cat = real
                             fake_cat = fakeact
 
-                        y_fake = discriminator(fake_cat)
-                        y_real = discriminator(real_cat)
+                        y_fake = discriminator(fake_cat).float()
+                        y_real = discriminator(real_cat).float()
 
                         pen = discriminator.calc_gradient_penalty(
                             real_cat, fake_cat, self._device, self.pac)
