@@ -480,7 +480,7 @@ class CTGANSynthesizer(BaseSynthesizer):
             self.nfgenerator.eval()
         for i in range(steps):
             if self._training_track == 'GAN':
-                fakez = torch.FloatTensor(self.gen_prior.sample([self._batch_size,self._embedding_dim])).to(device)
+                fakez = torch.FloatTensor(self.gen_prior.sample([self._batch_size,self._embedding_dim])).to(self._device)
                 fake = self.generator(fakez)
             else:
                 #fakez = self.nfgenerator.prior.sample((self._batch_size, self._data_dim)).to(self._device)
