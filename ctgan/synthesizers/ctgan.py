@@ -428,7 +428,8 @@ class CTGANSynthesizer(BaseSynthesizer):
 
                     # fake,_,__ = self.nfgenerator(fakez)
                     # fakeact = fake      
-                    real = torch.from_numpy(real.detach().cpu().numpy().astype('float32')).to(self._device)
+                    #real = torch.from_numpy(real.detach().cpu().numpy().astype('float32')).to(self._device)
+                    real = next(iter(self._data_loader)).float().to(self._device)
                     zs, prior_logprob, log_det = self.nfgenerator(real)
                     if len(prior_logprob)>1:
                         prior_logprob = torch.mean(prior_logprob,axis=1)
