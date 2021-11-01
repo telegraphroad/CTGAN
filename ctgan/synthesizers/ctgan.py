@@ -432,9 +432,9 @@ class CTGANSynthesizer(BaseSynthesizer):
                     real = next(iter(self._data_loader)).float().to(self._device)
                     zs, prior_logprob, log_det = self.nfgenerator(real)
                     
-                    print(len(prior_logprob))    
-                    print(pd.DataFrame(prior_logprob).shape)
-                    if len(prior_logprob)>1:
+                    print(len(prior_logprob.shape))    
+                    print(prior_logprob.shape)
+                    if len(prior_logprob.shape)>1:
                         prior_logprob = torch.mean(prior_logprob,axis=1)
                     logprob = logprob = prior_logprob + log_det
                     nfloss = -torch.mean(logprob)
