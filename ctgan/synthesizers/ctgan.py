@@ -329,13 +329,16 @@ class CTGANSynthesizer(BaseSynthesizer):
             self.generator_dim,
             data_dim
         ).to(self._device)
+        gparams = self.generator.parameters()
+        
         if self._training_track == 'GAN':
             self.generator.dist_p1 = torch.nn.parameter.Parameter(self.dist_p1,requires_grad=True)
             self.generator.dist_p2 = torch.nn.parameter.Parameter(self.dist_p2,requires_grad=True)
             self.generator.dist_p3 = torch.nn.parameter.Parameter(self.dist_p3,requires_grad=True)
             #print('++++++++++params set')
             print(self.generator.parameters)
-        gparams = list(self.generator.parameters()) + list([self.generator.dist_p1,self.generator.dist_p2,self.generator.dist_p3])
+            if self.dist_p1 is not None:
+                gparams = list(self.generator.parameters()) + list([self.generator.dist_p1,self.generator.dist_p2,self.generator.dist_p3])
 
         discriminator = Discriminator(
             data_dim,# + self._data_sampler.dim_cond_vec(),
