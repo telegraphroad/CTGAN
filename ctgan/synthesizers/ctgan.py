@@ -339,6 +339,8 @@ class CTGANSynthesizer(BaseSynthesizer):
             print(self.generator.parameters)
             if self.dist_p1 is not None:
                 gparams = list(self.generator.parameters()) + list([self.generator.dist_p1,self.generator.dist_p2,self.generator.dist_p3])
+                self.generator.register_parameter(name='TEST',param=torch.nn.Parameter(self.dist_p1))
+
 
         discriminator = Discriminator(
             data_dim,# + self._data_sampler.dim_cond_vec(),
