@@ -333,19 +333,25 @@ class CTGANSynthesizer(BaseSynthesizer):
             self.generator.dist_p1 = torch.nn.parameter.Parameter(self.dist_p1,requires_grad=True)
             self.generator.dist_p2 = torch.nn.parameter.Parameter(self.dist_p2,requires_grad=True)
             self.generator.dist_p3 = torch.nn.parameter.Parameter(self.dist_p3,requires_grad=True)
-            print('++++++++++params set')
+            #print('++++++++++params set')
             print(self.generator.parameters)
-        
+        gparams = list(self.generator.parameters()) + list([self.generator.dist_p1,self.generator.dist_p2,self.generator.dist_p3])
+
         discriminator = Discriminator(
             data_dim,# + self._data_sampler.dim_cond_vec(),
             self._discriminator_dim,
             pac=self.pac
         ).to(self._device)
 
+#         optimizerG = optim.AdamW(
+#             self.generator.parameters(), lr=self.generator_lr, betas=(0.5, 0.9),
+#             weight_decay=self.generator_decay
+#         )
         optimizerG = optim.AdamW(
-            self.generator.parameters(), lr=self.generator_lr, betas=(0.5, 0.9),
+            gparams, lr=self.generator_lr, betas=(0.5, 0.9),
             weight_decay=self.generator_decay
         )
+
         if self._training_track == 'NF':
             self.nfgenerator.dist_p1 = torch.nn.parameter.Parameter(self.dist_p1,requires_grad=True)
             self.nfgenerator.dist_p2 = torch.nn.parameter.Parameter(self.dist_p2,requires_grad=True)
