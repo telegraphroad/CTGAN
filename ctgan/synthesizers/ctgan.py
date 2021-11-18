@@ -131,6 +131,8 @@ class CTGANSynthesizer(BaseSynthesizer):
             Defaults to ``True``.
         gen_prior (torch.distributions.Distribution):
             Generator prior
+        variable_prior (bool):
+            sample or rsample
         training_track (str):
             'GAN' or 'NF'
         nfgenerator
@@ -139,7 +141,7 @@ class CTGANSynthesizer(BaseSynthesizer):
     def __init__(self,gen_prior, embedding_dim=128, generator_dim=(256, 256), discriminator_dim=(256, 256),
                  generator_lr=2e-4, generator_decay=1e-6, discriminator_lr=2e-4,
                  discriminator_decay=1e-6, batch_size=500, discriminator_steps=1,
-                 log_frequency=True, verbose=False, epochs=300, pac=10, cuda=True, training_track = 'GAN',nfgenerator = None):
+                 log_frequency=True, verbose=False, epochs=300, pac=10, cuda=True, training_track = 'GAN',nfgenerator = None,variable_prior=False):
 
         assert batch_size % 2 == 0
 
@@ -159,6 +161,7 @@ class CTGANSynthesizer(BaseSynthesizer):
         self._epochs = epochs
         self.nfgenerator = nfgenerator
         self.pac = pac
+        self._variable_prior = variable_prior
         self.glosses = []
         self.dlosses = []
 
@@ -347,7 +350,10 @@ class CTGANSynthesizer(BaseSynthesizer):
             for id_ in range(steps_per_epoch):
                 if self._training_track == 'GAN':
                     for n in range(self._discriminator_steps):
-                        fakez = torch.FloatTensor(self.gen_prior.sample([self._batch_size,self._embedding_dim]).cpu().numpy()).to(self._device)
+                        if self._variable_prior:
+                            fakez = torch.FloatTensor(self.gen_prior.rsample([self._batch_size,self._embedding_dim]).cpu().numpy()).to(self._device)
+                        else:
+                            fakez = torch.FloatTensor(self.gen_prior.sample([self._batch_size,self._embedding_dim]).cpu().numpy()).to(self._device)
 
                         #condvec = self._data_sampler.sample_condvec(self._batch_size)
                         condvec = None
@@ -393,7 +399,10 @@ class CTGANSynthesizer(BaseSynthesizer):
                         loss_d.backward()
                         optimizerD.step()
 
-                    fakez = torch.FloatTensor(self.gen_prior.sample([self._batch_size,self._embedding_dim]).cpu().numpy()).to(self._device)
+                    if self._variable_prior:
+                        fakez = torch.FloatTensor(self.gen_prior.rsample([self._batch_size,self._embedding_dim]).cpu().numpy()).to(self._device)
+                    else:
+                        fakez = torch.FloatTensor(self.gen_prior.sample([self._batch_size,self._embedding_dim]).cpu().numpy()).to(self._device)
                     #condvec = self._data_sampler.sample_condvec(self._batch_size)
                     condvec = None
 
