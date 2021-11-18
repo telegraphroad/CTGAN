@@ -333,6 +333,8 @@ class CTGANSynthesizer(BaseSynthesizer):
             self.generator.dist_p1 = torch.nn.parameter.Parameter(self.dist_p1,requires_grad=True)
             self.generator.dist_p2 = torch.nn.parameter.Parameter(self.dist_p2,requires_grad=True)
             self.generator.dist_p3 = torch.nn.parameter.Parameter(self.dist_p3,requires_grad=True)
+            print('++++++++++params set')
+            print(self.generator.parameters)
         
         discriminator = Discriminator(
             data_dim,# + self._data_sampler.dim_cond_vec(),
