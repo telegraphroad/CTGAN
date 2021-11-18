@@ -346,6 +346,7 @@ class CTGANSynthesizer(BaseSynthesizer):
         std = mean + 1
 
         steps_per_epoch = max(len(train_data) // self._batch_size, 1)
+        self.best_model = copy.deepcopy(self)
         for i in range(epochs):
             for id_ in range(steps_per_epoch):
                 if self._training_track == 'GAN':
