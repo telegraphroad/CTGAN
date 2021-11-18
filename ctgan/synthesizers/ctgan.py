@@ -79,6 +79,9 @@ class Generator(Module):
             dim += item
         seq.append(Linear(dim, data_dim))
         self.seq = Sequential(*seq)
+        self.dist_p1 = None
+        self.dist_p2 = None
+        self.dist_p3 = None
 
     def forward(self, input):
         data = self.seq(input)
@@ -164,9 +167,6 @@ class CTGANSynthesizer(BaseSynthesizer):
         self._variable_prior = variable_prior
         self.glosses = []
         self.dlosses = []
-        self.dist_p1 = None
-        self.dist_p2 = None
-        self.dist_p3 = None
 
         if not cuda or not torch.cuda.is_available():
             device = 'cpu'
