@@ -352,9 +352,11 @@ class CTGANSynthesizer(BaseSynthesizer):
                 if self._training_track == 'GAN':
                     for n in range(self._discriminator_steps):
                         if self._variable_prior:
-                            fakez = torch.FloatTensor(self.gen_prior.rsample([self._batch_size,self._embedding_dim]).cpu().numpy()).to(self._device)
+                            #fakez = torch.FloatTensor(self.gen_prior.rsample([self._batch_size,self._embedding_dim]).cpu().numpy()).to(self._device)
+                            fakez = self.gen_prior.rsample([self._batch_size,self._embedding_dim]).to(self._device)
                         else:
-                            fakez = torch.FloatTensor(self.gen_prior.sample([self._batch_size,self._embedding_dim]).cpu().numpy()).to(self._device)
+                            #fakez = torch.FloatTensor(self.gen_prior.sample([self._batch_size,self._embedding_dim]).cpu().numpy()).to(self._device)
+                            fakez = self.gen_prior.sample([self._batch_size,self._embedding_dim]).to(self._device)
 
                         #condvec = self._data_sampler.sample_condvec(self._batch_size)
                         condvec = None
