@@ -353,7 +353,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                     for n in range(self._discriminator_steps):
                         if self._variable_prior:
                             #fakez = torch.FloatTensor(self.gen_prior.rsample([self._batch_size,self._embedding_dim]).cpu().numpy()).to(self._device)
-                            fakez = self.gen_prior.rsample([self._batch_size,self._embedding_dim]).to(self._device)
+                            fakez = self.gen_prior.rsample([self._batch_size,self._embedding_dim]).squeeze().to(self._device)
                             print('fakezshape',fakez.shape)
                         else:
                             #fakez = torch.FloatTensor(self.gen_prior.sample([self._batch_size,self._embedding_dim]).cpu().numpy()).to(self._device)
