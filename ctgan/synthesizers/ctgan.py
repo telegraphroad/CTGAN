@@ -330,9 +330,9 @@ class CTGANSynthesizer(BaseSynthesizer):
             data_dim
         ).to(self._device)
         if self._training_track == 'GAN':
-            self.generator.dist_p1 = self.dist_p1
-            self.generator.dist_p2 = self.dist_p2
-            self.generator.dist_p3 = self.dist_p3
+            self.generator.dist_p1 = torch.nn.parameter.Parameter(self.dist_p1,requires_grad=True)
+            self.generator.dist_p2 = torch.nn.parameter.Parameter(self.dist_p2,requires_grad=True)
+            self.generator.dist_p3 = torch.nn.parameter.Parameter(self.dist_p3,requires_grad=True)
         
         discriminator = Discriminator(
             data_dim,# + self._data_sampler.dim_cond_vec(),
@@ -345,9 +345,9 @@ class CTGANSynthesizer(BaseSynthesizer):
             weight_decay=self.generator_decay
         )
         if self._training_track == 'NF':
-            self.nfgenerator.dist_p1 = self.dist_p1
-            self.nfgenerator.dist_p2 = self.dist_p2
-            self.nfgenerator.dist_p3 = self.dist_p3
+            self.nfgenerator.dist_p1 = torch.nn.parameter.Parameter(self.dist_p1,requires_grad=True)
+            self.nfgenerator.dist_p2 = torch.nn.parameter.Parameter(self.dist_p2,requires_grad=True)
+            self.nfgenerator.dist_p3 = torch.nn.parameter.Parameter(self.dist_p3,requires_grad=True)
 
             nfoptimizer = torch.optim.AdamW(self.nfgenerator.parameters(),lr=1e-4)
         optimizerD = optim.AdamW(
