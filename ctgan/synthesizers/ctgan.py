@@ -144,7 +144,7 @@ class CTGANSynthesizer(BaseSynthesizer):
     def __init__(self,gen_prior, embedding_dim=128, generator_dim=(256, 256), discriminator_dim=(256, 256),
                  generator_lr=2e-4, generator_decay=1e-6, discriminator_lr=2e-4,
                  discriminator_decay=1e-6, batch_size=500, discriminator_steps=1,
-                 log_frequency=True, verbose=False, epochs=300, pac=10, cuda=True, training_track = 'GAN',nfgenerator = None,variable_prior=False):
+                 log_frequency=True, verbose=False, epochs=300, pac=10, cuda=True, training_track = 'GAN',nfgenerator = None,variable_prior=False,dist_p1=None,dist+p2=None,dist_p3=None):
 
         assert batch_size % 2 == 0
 
@@ -167,7 +167,10 @@ class CTGANSynthesizer(BaseSynthesizer):
         self._variable_prior = variable_prior
         self.glosses = []
         self.dlosses = []
-
+        self.dist_p1 = dist_p1
+        self.dist_p2 = dist_p2
+        self.dist_p3 = dist_p3
+        
         if not cuda or not torch.cuda.is_available():
             device = 'cpu'
         elif isinstance(cuda, str):
@@ -326,7 +329,11 @@ class CTGANSynthesizer(BaseSynthesizer):
             self.generator_dim,
             data_dim
         ).to(self._device)
-
+        if self._training_track == 'GAN':
+            self.generator.dist_p1 = self.dist_p1
+            self.generator.dist_p2 = self.dist_p2
+            self.generator.dist_p3 = self.dist_p3
+        
         discriminator = Discriminator(
             data_dim,# + self._data_sampler.dim_cond_vec(),
             self._discriminator_dim,
@@ -338,6 +345,9 @@ class CTGANSynthesizer(BaseSynthesizer):
             weight_decay=self.generator_decay
         )
         if self._training_track == 'NF':
+            self.nfgenerator.dist_p1 = self.dist_p1
+            self.nfgenerator.dist_p2 = self.dist_p2
+            self.nfgenerator.dist_p3 = self.dist_p3
 
             nfoptimizer = torch.optim.AdamW(self.nfgenerator.parameters(),lr=1e-4)
         optimizerD = optim.AdamW(
