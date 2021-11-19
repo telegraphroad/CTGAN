@@ -497,7 +497,16 @@ class CTGANSynthesizer(BaseSynthesizer):
                     if nfloss.item()<min_loss:
                         min_loss = nfloss.item()
                         self.best_model = None
-                        self.best_model = copy.deepcopy(self)
+                        if self.generator is None:
+                            self.best_model = copy.deepcopy(self)
+                        else:
+                            tp = self.nfgenerator.prior
+                            self.nfgenerator.prior = None
+                            self.best_model = copy.deepcopy(self)
+                            self.best_model.nfgenerator.prior = tp
+                            self.nfgenerator.prior = tp
+
+                        #self.best_model = copy.deepcopy(self)
                         #print('new best performance detected!')
 
                     self.nfgenerator.zero_grad()
