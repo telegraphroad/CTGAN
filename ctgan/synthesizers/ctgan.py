@@ -466,7 +466,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                     if loss_g.item()<min_loss:
                         min_loss = loss_g.item()
                         #self.best_model = None
-                        self.best_model_sd = self.state_dict()
+                        self.best_model_sd = self.generator.state_dict()
                         #print('new best performance detected!')
 
                     optimizerG.zero_grad()
@@ -491,7 +491,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                     if nfloss.item()<min_loss:
                         min_loss = nfloss.item()
                         #self.best_model = None
-                        self.best_model_sd = self.state_dict()
+                        self.best_model_sd = self.nfgenerator.state_dict()
 
                         #self.best_model = copy.deepcopy(self)
                         #print('new best performance detected!')
@@ -510,7 +510,10 @@ class CTGANSynthesizer(BaseSynthesizer):
                     print(f"Epoch {i+1}, Loss G: {nfloss.detach().cpu(): .4f}, "
                       f"Loss D: {loss_d: .4f}",
                       flush=True)
-        self.best_model.load_state_dict(self.best_model_sd)
+        if self.nfgenerator is None:
+            self.best_model.generator.load_state_dict(self.best_model_sd)
+        else:
+            self.best_model.nfgenerator.load_state_dict(self.best_model_sd)
     def sample(self, n, condition_column=None, condition_value=None):
         """Sample data similar to the training data.
 
