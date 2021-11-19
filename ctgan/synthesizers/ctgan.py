@@ -335,8 +335,6 @@ class CTGANSynthesizer(BaseSynthesizer):
             self.generator.dist_p1 = torch.nn.parameter.Parameter(self.dist_p1,requires_grad=True)
             self.generator.dist_p2 = torch.nn.parameter.Parameter(self.dist_p2,requires_grad=True)
             self.generator.dist_p3 = torch.nn.parameter.Parameter(self.dist_p3,requires_grad=True)
-            print('++++++++++params set')
-            print(self.generator.parameters)
             if self.dist_p1 is not None:
                 gparams = list(self.generator.parameters()) + list([self.generator.dist_p1,self.generator.dist_p2,self.generator.dist_p3])
                 self.generator.register_parameter(name='TEST',param=torch.nn.Parameter(self.dist_p1))
