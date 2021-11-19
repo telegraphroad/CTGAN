@@ -372,14 +372,8 @@ class CTGANSynthesizer(BaseSynthesizer):
         std = mean + 1
 
         steps_per_epoch = max(len(train_data) // self._batch_size, 1)
-        if self.generator is None:
-            self.best_model = copy.deepcopy(self)
-        else:
-            tp = self.nfgenerator.prior
-            self.nfgenerator.prior = None
-            self.best_model = copy.deepcopy(self)
-            self.best_model.nfgenerator.prior = tp
-            self.nfgenerator.prior = tp
+        
+        self.best_model = copy.deepcopy(self)
         for i in range(epochs):
             for id_ in range(steps_per_epoch):
                 if self._training_track == 'GAN':
@@ -471,8 +465,8 @@ class CTGANSynthesizer(BaseSynthesizer):
                     self.glosses.append(loss_g.detach().cpu().numpy())
                     if loss_g.item()<min_loss:
                         min_loss = loss_g.item()
-                        self.best_model = None
-                        self.best_model = copy.deepcopy(self)
+                        #self.best_model = None
+                        self.best_model_sd = self.state_dict()
                         #print('new best performance detected!')
 
                     optimizerG.zero_grad()
@@ -496,15 +490,8 @@ class CTGANSynthesizer(BaseSynthesizer):
                     nfloss = -torch.mean(logprob)
                     if nfloss.item()<min_loss:
                         min_loss = nfloss.item()
-                        self.best_model = None
-                        if self.generator is None:
-                            self.best_model = copy.deepcopy(self)
-                        else:
-                            tp = self.nfgenerator.prior
-                            self.nfgenerator.prior = None
-                            self.best_model = copy.deepcopy(self)
-                            self.best_model.nfgenerator.prior = tp
-                            self.nfgenerator.prior = tp
+                        #self.best_model = None
+                        self.best_model_sd = self.state_dict()
 
                         #self.best_model = copy.deepcopy(self)
                         #print('new best performance detected!')
@@ -523,6 +510,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                     print(f"Epoch {i+1}, Loss G: {nfloss.detach().cpu(): .4f}, "
                       f"Loss D: {loss_d: .4f}",
                       flush=True)
+        self.best_model.load_state_dict(self.best_model_sd)
     def sample(self, n, condition_column=None, condition_value=None):
         """Sample data similar to the training data.
 
