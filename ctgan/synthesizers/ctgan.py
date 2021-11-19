@@ -373,7 +373,7 @@ class CTGANSynthesizer(BaseSynthesizer):
 
         steps_per_epoch = max(len(train_data) // self._batch_size, 1)
         
-        self.best_model = copy.copy(self)
+        #self.best_model = copy.copy(self)
         for i in range(epochs):
             for id_ in range(steps_per_epoch):
                 if self._training_track == 'GAN':
@@ -511,9 +511,9 @@ class CTGANSynthesizer(BaseSynthesizer):
                       f"Loss D: {loss_d: .4f}",
                       flush=True)
         if self.nfgenerator is None:
-            self.best_model.generator.load_state_dict(self.best_model_sd)
+            self.generator.load_state_dict(self.best_model_sd)
         else:
-            self.best_model.nfgenerator.load_state_dict(self.best_model_sd)
+            self.nfgenerator.load_state_dict(self.best_model_sd)
     def sample(self, n, condition_column=None, condition_value=None):
         """Sample data similar to the training data.
 
