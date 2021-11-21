@@ -496,7 +496,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                         if len(logp.shape)>1:
                             logp = torch.sum(logp,axis=1)#mean!
 
-                        logq = model.log_prob(s)
+                        logq = self.nfgenerator.log_prob(s)
                         diff = logp - logq
                         weights = torch.exp(diff - diff.max())
                         prob = torch.sign(weights.unsqueeze(1) - weights.unsqueeze(0))
