@@ -138,13 +138,15 @@ class CTGANSynthesizer(BaseSynthesizer):
             sample or rsample
         training_track (str):
             'GAN' or 'NF'
+        nfloss (str):
+            NF loss type: 'ML' or 'TA'
         nfgenerator
     """
 
     def __init__(self,gen_prior, embedding_dim=128, generator_dim=(256, 256), discriminator_dim=(256, 256),
                  generator_lr=2e-4, generator_decay=1e-6, discriminator_lr=2e-4,
                  discriminator_decay=1e-6, batch_size=500, discriminator_steps=1,
-                 log_frequency=True, verbose=False, epochs=300, pac=10, cuda=True, training_track = 'GAN',nfgenerator = None,variable_prior=False,dist_p1=None,dist_p2=None,dist_p3=None):
+                 log_frequency=True, verbose=False, epochs=300, pac=10, cuda=True, training_track = 'GAN',nfgenerator = None,nfloss='ML',variable_prior=False,dist_p1=None,dist_p2=None,dist_p3=None):
 
         assert batch_size % 2 == 0
 
@@ -165,6 +167,7 @@ class CTGANSynthesizer(BaseSynthesizer):
         self.nfgenerator = nfgenerator
         self.pac = pac
         self._variable_prior = variable_prior
+        self._nfloss = nfloss
         self.glosses = []
         self.dlosses = []
         self.dist_p1 = dist_p1
@@ -319,7 +322,7 @@ class CTGANSynthesizer(BaseSynthesizer):
         #     self._transformer.output_info_list,
         #     self._log_frequency)
 
-        min_loss = 999999999999999999.99999999999999
+        self.min_loss = 999999999999999999.99999999999999
         loss_d = 0.0
         data_dim = train_data.shape[1]
         self._data_dim = data_dim
@@ -461,8 +464,8 @@ class CTGANSynthesizer(BaseSynthesizer):
 
                     loss_g = -torch.mean(y_fake) + cross_entropy
                     self.glosses.append(loss_g.detach().cpu().numpy())
-                    if loss_g.item()<min_loss:
-                        min_loss = loss_g.item()
+                    if loss_g.item()<self.min_loss:
+                        self.min_loss = loss_g.item()
                         #self.best_model = None
                         self.best_model_sd = self.generator.state_dict()
                         #print('new best performance detected!')
@@ -484,10 +487,27 @@ class CTGANSynthesizer(BaseSynthesizer):
                     #print(prior_logprob.shape)
                     if len(prior_logprob.shape)>1:
                         prior_logprob = torch.mean(prior_logprob,axis=1)
-                    logprob = logprob = prior_logprob + log_det
-                    nfloss = -torch.mean(logprob)
-                    if nfloss.item()<min_loss:
-                        min_loss = nfloss.item()
+                    logprob = prior_logprob + log_det
+                    if self._nfloss == 'ML':
+                        nfloss = -torch.mean(logprob)
+                    elif self._nfloss == 'TA':
+                        s = self.nfgenerator.sample(2000)
+                        logp = model.prior.log_prob(s)
+                        if len(logp.shape)>1:
+                            logp = torch.sum(logp,axis=1)#mean!
+
+                        logq = model.log_prob(s)
+                        diff = logp - logq
+                        weights = torch.exp(diff - diff.max())
+                        prob = torch.sign(weights.unsqueeze(1) - weights.unsqueeze(0))
+                        prob = torch.greater(prob, 0.5).float()
+                        F = 1 - prob.sum(1) / self.n_particles
+                        gammas = F ** self.beta
+                        gammas /= gammas.sum()
+                        nfloss = -torch.sum(torch.unsqueeze(gammas * diff, 1))
+                        #print(nfloss.item())
+                    if nfloss.item() < self.min_loss:
+                        self.min_loss = nfloss.item()
                         #self.best_model = None
                         self.best_model_sd = self.nfgenerator.state_dict()
 
