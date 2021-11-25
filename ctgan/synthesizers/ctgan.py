@@ -505,7 +505,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                         F = 1 - prob.sum(1) / 2000
                         gammas = F ** beta
                         gammas /= gammas.sum()
-                        nfloss = -torch.sum(torch.unsqueeze(gammas * diff, 1))
+                        nfloss = -torch.mean(torch.unsqueeze(gammas * diff, 1))
                         #print(nfloss.item())
                     if nfloss.item() < self.min_loss:
                         self.min_loss = nfloss.item()
