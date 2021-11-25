@@ -495,7 +495,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                         s = self.nfgenerator.sample(2000)
                         logp = self.nfgenerator.prior.log_prob(s)
                         if len(logp.shape)>1:
-                            logp = torch.sum(logp,axis=1)#mean!
+                            logp = torch.mean(logp,axis=1)#mean!
 
                         logq = self.nfgenerator.log_prob(s)
                         diff = logp - logq
@@ -505,7 +505,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                         F = 1 - prob.sum(1) / 2000
                         gammas = F ** beta
                         gammas /= gammas.sum()
-                        nfloss = -torch.mean(torch.unsqueeze(gammas * diff, 1))
+                        nfloss = -torch.sum(torch.unsqueeze(gammas * diff, 1))
                         #print(nfloss.item())
                     if nfloss.item() < self.min_loss:
                         self.min_loss = nfloss.item()
