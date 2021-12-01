@@ -492,7 +492,8 @@ class CTGANSynthesizer(BaseSynthesizer):
                         nfloss = -torch.mean(logprob)
                     elif self._nfloss == 'TA':
                         beta = -1
-                        s = self.nfgenerator.sample(2000)
+                        #s = self.nfgenerator.sample(2000)
+                        s = real
                         logp = self.nfgenerator.prior.log_prob(s)
                         if len(logp.shape)>1:
                             logp = torch.mean(logp,axis=1)#mean!
