@@ -503,7 +503,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                         weights = torch.exp(diff - diff.max())
                         prob = torch.sign(weights.unsqueeze(1) - weights.unsqueeze(0))
                         prob = torch.greater(prob, 0.5).float()
-                        F = 1 - prob.sum(1) / 2000
+                        F = 1 - prob.sum(1) / self._batch_size
                         gammas = F ** beta
                         gammas /= gammas.sum()
                         nfloss = -torch.sum(torch.unsqueeze(gammas * diff, 1))
