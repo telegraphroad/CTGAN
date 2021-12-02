@@ -362,6 +362,7 @@ class CTGANSynthesizer(BaseSynthesizer):
             self.nfgenerator.dist_p1 = torch.nn.parameter.Parameter(self.dist_p1,requires_grad=True)
             self.nfgenerator.dist_p2 = torch.nn.parameter.Parameter(self.dist_p2,requires_grad=True)
             self.nfgenerator.dist_p3 = torch.nn.parameter.Parameter(self.dist_p3,requires_grad=True)
+            self.best_model_sd = self.nfgenerator.state_dict()
 
             nfoptimizer = torch.optim.AdamW(self.nfgenerator.parameters(),lr=1e-4)
         optimizerD = optim.AdamW(
@@ -375,6 +376,7 @@ class CTGANSynthesizer(BaseSynthesizer):
         steps_per_epoch = max(len(train_data) // self._batch_size, 1)
         
         #self.best_model = copy.copy(self)
+        
         for i in range(epochs):
             for id_ in range(steps_per_epoch):
                 if self._training_track == 'GAN':
