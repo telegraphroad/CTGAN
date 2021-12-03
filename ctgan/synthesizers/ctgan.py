@@ -519,7 +519,7 @@ class CTGANSynthesizer(BaseSynthesizer):
                         #print('new best performance detected!')
 
                     self.nfgenerator.zero_grad()
-                    nfloss.backward()
+                    nfloss.backward(retain_graph=True)#!!!retain_graph=True
                     nfoptimizer.step()
                     self.glosses.append(nfloss.detach().cpu().numpy())
 
